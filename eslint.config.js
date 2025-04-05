@@ -4,6 +4,7 @@ import astroParser from 'astro-eslint-parser';
 import eslintPluginAstro from 'eslint-plugin-astro';
 import astroPlugin from 'eslint-plugin-astro';
 import noRelativeImportPathsPlugin from 'eslint-plugin-no-relative-import-paths';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import pluginTs from 'typescript-eslint';
@@ -82,5 +83,6 @@ export default [
         sourceType: 'module'
       }
     }
-  }
+  },
+  eslintPluginPrettierRecommended
 ];

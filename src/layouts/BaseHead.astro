@@ -6,9 +6,9 @@ import '@/styles/global.css';
 import { SITE_TITLE } from '@/consts';
 
 interface Props {
-	title: string;
-	description: string;
-	image?: string;
+  title: string;
+  description: string;
+  image?: string;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -21,9 +21,7 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <meta content="width=device-width,initial-scale=1" name="viewport" />
 <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
 <link href="/sitemap-index.xml" rel="sitemap" />
-<link
-	href={new URL('rss.xml', Astro.site)}  rel="alternate"  title={SITE_TITLE}  type="application/rss+xml"
-/>
+<link href={new URL('rss.xml', Astro.site)} rel="alternate" title={SITE_TITLE} type="application/rss+xml" />
 <meta content={Astro.generator} name="generator" />
 
 <!-- Font preloads -->
