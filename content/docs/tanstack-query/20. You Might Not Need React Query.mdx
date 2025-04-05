@@ -1,0 +1,126 @@
+---
+title: '[번역] You Might Not Need React Query'
+description: TkDodo의 You Might Not Need React Query 번역
+image: https://tkdodo.eu/blog/static/f4480150611739f92319a05f1e56d69b/bbe0c/trees.jpg
+icon:
+tags:
+  - Tanstack-Query
+date: 2025-01-07T15:50
+updated:
+series:
+slug: you-might-not-need-react-query
+---
+
+[React 서버 컴포넌트](https://react.dev/blog/2023/03/22/react-labs-what-we-have-been-working-on-march-2023#react-server-components)가 React Query를 죽일까요? 지난 몇 달 동안 제가 가장 많이 받은 질문일 것입니다. 문제는 제게 좋은 대답이 없다는 것입니다. 기억하세요: 이 업계의 대부분의 개발자와 마찬가지로 저 역시 일을 진행하면서 만들어가는 중입니다. 모든 것에 대한 거창한 계획을 기대했다면 실망시켜드리겠습니다. 결국 어떻게 될지 저도 여러분만큼이나 궁금합니다. 😅
+
+<div class="flex justify-center">
+  <blockquote class="twitter-tweet">
+    <p lang="en" dir="ltr">
+      Not gonna lie that (as a maintainer of a library in the data fetching space) I&#39;m feeling mostly afraid of
+      server components and suspense.
+      <br />
+      <br />
+      &quot;How will this work with react-query&quot; is a good question. It feels like I&#39;m supposed to have an
+      answer but I don&#39;t. Huge imposter syndrome rn
+    </p>
+    &mdash; Dominik 🔮 (@TkDodo){' '}
+    <a href="https://twitter.com/TkDodo/status/1585204181651988481?ref_src=twsrc%5Etfw">October 26, 2022</a>
+  </blockquote>{' '}
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+
+하지만 이제 이 주제를 좀 더 자세히 살펴볼 시간이 생겼고, 저보다 이 주제에 대해 더 많이 알고 있는 분들과도 이 문제에 대해 논의했습니다. 이제 이 주제에 대한 제 의견을 말씀드릴 수 있을 만큼 자신감이 생겼습니다. 하지만 여기까지가 제 생각일 뿐이니 소금 한 알로 받아들이세요.
+
+## My Take
+
+우리가 사용하는 모든 도구는 우리가 겪고 있는 문제를 해결하는 데 도움이 되어야 합니다. 전통적으로 React는 애플리케이션에서 데이터를 가져오는 방법에 대한 의견이 거의 없었습니다. 여기에는 `useEffect`가 있고 사용자가 원하는 것을 할 수 있습니다.
+
+바로 이 시기에 [React Query](https://tanstack.com/query/latest/docs/react/overview)나 [swr](https://swr.vercel.app/)과 같은 라이브러리가 탄생했습니다. 이 라이브러리들은 꽤 큰 공백을 메웠고, 뛰어난 DX와 사용자를 위한 개선 사항으로 인해 빠르게 채택되었습니다. [React Router](https://reactrouter.com/en/main)도 비슷한 범주에 속하며, 'view' 라이브러리에 즉시 제공할 수 있는 것이 없을 때 라우팅의 필요성을 해결해 줍니다.
+
+서버 측 렌더링이 등장했을 당시에는 초기 페이지 로딩 속도를 높이기 위해 서버에서 HTML을 미리 렌더링하는 데 주로 집중했습니다. 그 이후에는 클라이언트 측 페이지 탐색 등 앱이 완전한 SPA처럼 작동합니다. 이 세계에서는 React Query도 중요한 역할을 합니다: 초기 데이터 가져오기를 서버로 옮긴 다음 클라이언트에서 가져오기 결과를 hydrate 할 수 있습니다. 이렇게 하면 서버에서 가능한 한 빨리 [캐시를 시드](https://tkdodo.eu/blog/seeding-the-query-cache)하는 좋은 방법이 됩니다.
+
+### So what changed?
+
+시대는 진화하고 있고 상황은 점점 더 좋아지고 있습니다. 상황이 앞뒤로 요동치는 것처럼 보일지라도 실제로는 앞으로 나아가고 있습니다:
+
+<div class="flex justify-center">
+  <blockquote class="twitter-tweet">
+    <p lang="en" dir="ltr">
+      i&#39;m sure <a href="https://twitter.com/Mappletons?ref_src=twsrc%5Etfw">@Mappletons</a> can do better but this
+      is what i see in my head every time i see &quot;devs just go back and forth in endless cycles&quot; comments{' '}
+      <a href="https://t.co/PcVhiNViIF">pic.twitter.com/PcVhiNViIF</a>
+    </p>
+    &mdash; swyx (@swyx){' '}
+    <a href="https://twitter.com/swyx/status/1260019961868677121?ref_src=twsrc%5Etfw">May 12, 2020</a>
+  </blockquote>{' '}
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+
+React는 여전히 컴포넌트를 렌더링하는 라이브러리에 불과하지만, 서버 컴포넌트를 사용하면 서버에서 미리 렌더링할 수 있는 새로운 애플리케이션 아키텍처를 제공합니다. 이는 빌드 시간 동안 또는 런타임에 클라이언트에서 쿼리해야 하는 API를 빌드하지 않고도 데이터에 액세스할 수 있도록 허용할 수 있습니다:
+
+```jsx title="server-component"
+export default async function Page() {
+  const data = await fetch(`https://api.github.com/repos/tanstack/react-query`);
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.description}</p>
+    </div>
+  );
+}
+```
+
+React 컴포넌트 내에서 `async/await`만 사용해도 작동한다는 사실이 여전히 놀랍고, 프레임워크가 이 문제를 포착하고 이에 대한 최고 수준의 솔루션을 제공하는 것을 보는 것은 흥미롭습니다. 이는 이 아키텍처를 채택하는 애플리케이션의 상황을 극적으로 변화시킵니다. React Query는 무엇보다도 클라이언트에서 비동기 상태를 관리하기 위한 라이브러리입니다. 데이터 불러오기가 서버에서만 이루어진다면 왜 쿼리가 필요할까요?
+
+## **You Might Not Need It**
+
+정답은 아마도 필요하지 않을 것입니다. 새 애플리케이션을 시작하고 데이터 불러오기 및 변이에 대한 좋은 스토리가 있는 [Next.js](https://nextjs.org/) 또는 [Remix](https://remix.run/)와 같은 성숙한 프레임워크를 사용한다면 React Query가 필요하지 않을 수 있습니다.
+
+그리고 그것은 완전히 괜찮습니다. 제가 React Query를 유지한다고 해서 가능한 모든 상황에서 사용하라고 말씀드리는 것은 아닙니다. 사용하기로 결정했다면 문제 해결에 도움이 되기 때문이어야 합니다.
+
+## **Integration**
+
+서버 컴포넌트라는 새로운 세계에 React Query를 통합하려면 아직 많은 부분이 남아있습니다. 우선, 대부분의 프로젝트는 백지 상태에서 시작하지 않습니다. 수년에 걸쳐 구축된 수많은 애플리케이션이 있으며, `app` 디렉터리를 점진적으로 채택할 수는 있지만 서버 컴포넌트를 활용하려면 일종의 재설계가 필요합니다.
+
+이 과도기 동안 React Query는 `app` 디렉토리 및 서버 컴포넌트와 매우 잘 통합됩니다. 일부 컴포넌트를 서버에서만 가져오도록 이동하거나 서버 컴포넌트를 사용하여 캐시를 미리 가져와서 결과를 클라이언트 컴포넌트로 전달할 수 있으며, 여기서 `useQuery`를 사용할 수 있습니다. 전부 아니면 전무일 필요는 없습니다. [공식 문서](https://tanstack.com/query/v4/docs/react/guides/ssr#using-the-app-directory-in-nextjs-13)에 이미 이 통합에 대한 좋은 가이드가 있으며, 주의해야 할 사항에 대한 다른 블로그 게시물로 후속 조치를 취할 것입니다.
+
+## **Hybrid approach**
+
+이 하이브리드 접근 방식은 서버 컴포넌트가 (아직) 잘 지원하지 않는 사용 사례에 직면한 경우 특히 유용할 수 있습니다.
+
+예를 들어 무한 스크롤 목록을 렌더링하여 서버에서 첫 페이지를 미리 가져오고 사용자가 끝으로 스크롤할수록 클라이언트에서 더 많은 페이지를 가져오고 싶을 수 있습니다. 또는 [네트워크 연결 없이](https://tkdodo.eu/blog/offline-react-query)도 앱이 작동해야 하는 요구 사항이 있을 수도 있습니다. 또는 명시적인 사용자 상호작용 없이도 항상 새로운 데이터를 볼 수 있는 사용자 경험을 원할 수도 있습니다(예: 간격 가져오기 또는 React Query에서 제공하는 모든 스마트 자동 리프레시).
+
+React Query는 이러한 모든 상황에 대한 훌륭한 스토리를 가지고 있으므로 서버 컴포넌트와 결합하는 것이 합당한 경우가 분명히 있습니다. 하지만 데이터를 가져와서 사용자에게 표시하는 데 주로 React Query를 사용했다면 서버 컴포넌트로도 충분히 커버할 수 있을 것입니다. 그리고 일단 mutation 스토리([server actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions))가 정해진 패턴이 되면 데이터를 업데이트할 때에도 필요하지 않을 수도 있습니다.
+
+## It’s not a “killer”
+
+여러 가지 이유로 모든 사람이 서버 컴포넌트를 채택하지는 않을 것이라고 생각합니다. 백엔드가 nodeJs로 작성되지 않았을 수도 있고, 프론트엔드가 전용 서버 없이 SPA로 되어 있어도 괜찮을 수도 있습니다. React Native로 모바일 앱을 빌드하고 있을 수도 있습니다. TanStack Query사용자라면 React를 전혀 사용하지 않을 수도 있습니다.
+
+또한 데이터 불러오기 이외의 다른 용도로도 React Query를 사용할 수 있습니다. 이 트윗에 대한 답글을 보고 영감을 얻으세요:
+
+<div class="flex justify-center">
+  <blockquote class="twitter-tweet">
+    <p lang="en" dir="ltr">
+      What are some things that you use TanStack Query for that is _not_ data fetching? Curious to know what other
+      use-cases you all have 😄
+    </p>
+    &mdash; Dominik 🔮 (@TkDodo){' '}
+    <a href="https://twitter.com/TkDodo/status/1616490384305311745?ref_src=twsrc%5Etfw">January 20, 2023</a>
+  </blockquote>{' '}
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+
+이 모든 사용 사례는 클라이언트에서 비동기 상태 관리자로 Query를 선택하기에 완벽한 사용 사례입니다. 하지만 이를 기본적으로 지원하는 프레임워크를 사용하고자 한다면 그 프레임워크를 사용하세요! 왜 로더에서 데이터를 가져오지 않고 리믹스를 사용하나요? 🤷‍♂️
+
+따라서 제 예상은 여전히 TanStack Query용 React 서버 컴포넌트 외부에서, 심지어 TanStack Query와 결합하여 사용하는 경우가 많을 것이라는 것입니다. 하지만 현재 이야기는 모두 RSC에 관한 것이고, 이는 괜찮습니다. 모두가 사용해보고 싶어하는 새롭고 반짝이는 기술이기 때문입니다.
+
+하지만 아직 초기 단계의 최첨단 기술입니다. 이를 사용하려면 특정 프레임워크, 라우터 및 번들러와 긴밀하게 통합해야 합니다. 또한 추가 서버 부하를 처리할 수 있는 인프라가 있어야 한다는 뜻이기도 합니다. 계속 반복되는 말이지만:
+
+> 공짜 점심은 없습니다. 모든 것은 대가입니다.
+
+![https://tkdodo.eu/blog/static/f4984c75af932f831d2b9ceef2496aea/f21ed/tradeoffs.jpg](https://tkdodo.eu/blog/static/f4984c75af932f831d2b9ceef2496aea/f21ed/tradeoffs.jpg)
+
+따라서 모든 것을 서버 컴포넌트로 바로 옮길 필요는 없습니다. 저는 Next.js 사용자로서 주로 중첩 경로의 이점을 누리기 위해 앱을 `app` 디렉토리로 옮기게 되어 기쁩니다. 그리고 좀 더 정적인 데이터 가져오기(예: `staleTime: Infinity`가 있는 곳)를 서버 컴포넌트로 옮길 것입니다.
+
+하지만 리액트 쿼리의 죽음에 대한 보도는 크게 과장된 것입니다.

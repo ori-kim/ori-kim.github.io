@@ -1,0 +1,84 @@
+---
+import { render } from 'astro:content';
+import readingTime from 'reading-time';
+
+import { SideMenu } from '@/feature/components/SideMenu';
+import { Time } from '@/feature/components/Time';
+import PostJsonLd from '@/feature/JsonLD/PostJsonLd.astro';
+import { components } from '@/feature/MDX';
+import { AdjacentPostNav } from '@/feature/Post/AdjacentPostNav';
+import { Giscus } from '@/feature/Post/Giscus';
+import { MDXWrapper } from '@/feature/Post/MDXWrapper';
+import { ReadingTime } from '@/feature/Post/ReadingTime';
+import { TagList } from '@/feature/Post/TagList';
+import { Toc } from '@/feature/Post/Toc';
+import { ThemeDropdown } from '@/feature/Theme/ThemeDropdown';
+import { Separator } from '@/feature/ui/separator';
+import { BackButton } from '@/layouts/component/BackButton';
+import { DefaultHeader } from '@/layouts/component/DefaultHeader';
+import PageLayout from '@/layouts/PageLayout.astro';
+import type { CollectionData } from '@/service/mdx';
+import { ContentBuilder } from '@/service/mdx';
+
+export async function getStaticPaths() {
+  const posts = (await ContentBuilder.ALL()).list();
+
+  return posts.map((post) => ({
+    params: { slug: post.data.slug },
+    props: post
+  }));
+}
+
+type Props = CollectionData;
+
+const post = Astro.props;
+
+const { prev, next } = await ContentBuilder.getAdjacentType(post);
+
+const time = Math.ceil(readingTime(post.body || '', { wordsPerMinute: 300 }).minutes);
+
+const { Content } = await render(post);
+---
+
+<PageLayout
+  seo={{
+    title: post.data.title,
+    description: post.data.description,
+    image: post.data.image
+  }}
+>
+  <section class="my-5" data-animate>
+    <DefaultHeader client:load title={post.data.title}>
+      <div>
+        <img alt={post.data.title} class="my-5 w-full rounded-lg shadow-lg" src={post.data.image} />
+      </div>
+
+      <div class="flex items-center">
+        <Time date={post.data.date} />
+        <Separator className="mx-2 h-4" orientation="vertical" />
+        <ReadingTime client:load time={time} />
+      </div>
+
+      <TagList className="pt-5" client:load tags={post.data.tags} />
+
+      <Separator className="my-5" />
+    </DefaultHeader>
+
+    <MDXWrapper>
+      <Content components={components} />
+    </MDXWrapper>
+
+    <AdjacentPostNav className="my-10" client:load next={next} prev={prev} />
+
+    <Giscus client:load />
+  </section>
+
+  <SideMenu className="pt-20">
+    <div class="my-5">
+      <BackButton client:only="react" />
+      <ThemeDropdown client:only="react" />
+    </div>
+    <Toc body={post.body || ''} client:load />
+  </SideMenu>
+</PageLayout>
+<PostJsonLd post={post} />

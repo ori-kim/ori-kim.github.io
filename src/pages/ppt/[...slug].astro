@@ -1,0 +1,63 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import { getCollection } from 'astro:content';
+
+import { SideMenu } from '@/feature/components/SideMenu';
+import { MDXWrapper } from '@/feature/Post/MDXWrapper';
+import { Toc } from '@/feature/Post/Toc';
+import { ThemeDropdown } from '@/feature/Theme/ThemeDropdown';
+import { BackButton } from '@/layouts/component/BackButton';
+import { SocialList } from '@/layouts/component/SocialList';
+import PageLayout from '@/layouts/PageLayout.astro';
+
+export async function getStaticPaths() {
+  const ppts = await getCollection('ppt');
+
+  return ppts.map((ppt) => ({
+    params: { slug: ppt.data.slug },
+    props: ppt
+  }));
+}
+
+type Props = CollectionEntry<'ppt'>;
+
+const ppt = Astro.props;
+
+const seo = {
+  title: ppt.data.title,
+  description: ppt.data.description,
+  image: '/notionFace.png'
+};
+
+const { Content } = await render(ppt);
+---
+
+<PageLayout seo={seo}>
+  <section class="my-20 gap-5 md:flex" data-animate>
+    <div class="mx-auto w-1/2 md:w-1/4">
+      <img alt="About" class="w-full rounded-lg shadow-lg" src="/notionFace.png" />
+    </div>
+
+    <div class="flex flex-col items-center justify-center py-2 md:block md:w-3/4">
+      <h1 class="text-lg font-bold">{ppt.data.title}</h1>
+      <p class="my-5">{ppt?.data.description}</p>
+
+      <SocialList client:load />
+    </div>
+  </section>
+
+  <section>
+    <MDXWrapper>
+      <Content />
+    </MDXWrapper>
+  </section>
+
+  <SideMenu className="pt-20">
+    <div class="my-5">
+      <BackButton client:only="react" />
+      <ThemeDropdown client:only="react" />
+    </div>
+    <Toc body={ppt.body || ''} client:load />
+  </SideMenu>
+</PageLayout>

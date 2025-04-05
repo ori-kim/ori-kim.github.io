@@ -1,0 +1,58 @@
+---
+import { CONTENT_TYPE_LIST } from '@/consts';
+import { AnimatedCounter } from '@/feature/components/AnimatedCounter';
+import { DefaultHeader } from '@/layouts/component/DefaultHeader';
+import { SocialList } from '@/layouts/component/SocialList';
+import PageLayout from '@/layouts/PageLayout.astro';
+import PostsGrid from '@/layouts/PostsGrid.astro';
+import { ContentBuilder } from '@/service/mdx';
+
+const posts = (await ContentBuilder.ALL()).list();
+---
+
+<PageLayout>
+  <DefaultHeader client:load title="개발자 오릭" />
+
+  <section class="my-10" data-animate data-animate-speed="slow">
+    <span>코드를 즐기며, 커피를 좋아합니다.</span>
+    <br />
+    <span>글 읽는 것을 좋아합니다. 글을 수집하는 것에서 멈추지 않고 작성하려 합니다.</span>
+    <br />
+    <p>
+      블로그에 발행한 총 포스트는
+      <AnimatedCounter className="font-bold text-black dark:text-white" client:load end={posts.length} />
+      개 입니다.
+    </p>
+    <article class="my-5">
+      <span class="mr-1">저에 대해서는</span>
+      <SocialList client:load />
+      <span>에서 확인할 수 있습니다.</span>
+    </article>
+  </section>
+
+  <section class="my-10" data-animate>
+    <h2 class="mb-4 text-lg font-semibold">공간</h2>
+    <ul data-animate>
+      {
+        CONTENT_TYPE_LIST.map(({ type, title, description }) => (
+          <li>
+            <a class="group inline-flex w-full items-center justify-between gap-5 hover:underline" href={`/${type}`}>
+              <div class="w-1/6 font-semibold underline">
+                <span class="rounded-md px-1 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">{title}</span>
+              </div>
+              <div class="w-full">
+                <span class="rounded-md px-1 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">{description}</span>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section data-animate>
+    <h2 class="mb-4 text-lg font-bold">최근 포스트</h2>
+
+    <PostsGrid posts={posts.slice(0, 3)} />
+  </section>
+</PageLayout>
